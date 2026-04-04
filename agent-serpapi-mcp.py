@@ -24,7 +24,12 @@ async def main():
         allowed_tools=["mcp__serpapi__*"], #Base name:mcp__<server-name>__<tool-name>
     )
 
-    USER_PROMPT = "Use the MCP server to explain what it does and how to use it."
+    # USER_PROMPT = "Use the MCP server to explain what it does and how to use it."
+    # USER_PROMPT = "Use the MCP server; What's trending news for AI? share links if possible."
+
+    SYSTEM_PROMPT = "Always use the SerpApi MCP server for web search;" # Pro tips add system prompt
+    USER_PROMPT = SYSTEM_PROMPT + "Find me a hotel under $100 in Bay Area next week."
+
     async for message in query(
         prompt=USER_PROMPT,
         options=options,

@@ -12,5 +12,6 @@ python agent.py
 - [DONE] Native web search                  # Not optimal result
 - [DONE] Custom tool (SerpApi - one tool)       # Can we go without MCP?
 - [DONE] Custom tool (SerpApi - multiple tools)
-- [] MCP  - Server SerpApi
+- [X] Connect MCP  - Server SerpApi
+    - [ ] How to use MCP with user prompt
 - [] Skills SerpApi
