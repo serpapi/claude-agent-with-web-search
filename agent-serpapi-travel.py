@@ -6,6 +6,7 @@ import requests
 import asyncio
 from typing import Any
 from claude_agent_sdk import tool, create_sdk_mcp_server, query, ClaudeAgentOptions, AssistantMessage, ResultMessage
+from claude_agent_sdk.types import StreamEvent
 
 import os
 from dotenv import load_dotenv
@@ -37,9 +38,9 @@ async def search_flights(args: dict[str, Any]) -> dict[str, Any]:
     try:
         departure_id = args["departure_id"]
         arrival_id = args["arrival_id"]
-        flight_type = args["type"]  #args.get("type", 1)  # Default to round trip if not provided
+        flight_type = args.get("type", 1)  # Default to round trip if not provided
         outbound_date = args["outbound_date"]
-        return_date = args["return_date"] #args.get("return_date", "")
+        return_date = args.get("return_date", "")
 
         print(f"Parsed input - Departure: {departure_id}, Arrival: {arrival_id}, Type: {flight_type}, Outbound Date: {outbound_date}, Return Date: {return_date}")  # Debugging statement
 
@@ -64,12 +65,11 @@ async def search_flights(args: dict[str, Any]) -> dict[str, Any]:
     if response.status_code == 200:
         results = response.json()
         # Extract relevant flight information (this is just an example, adjust as needed)
-        flights = results.get("best_flights", []) #optional: other_flights
+        flights = results.get("best_flights", [])[:2] #optional: other_flights #:2 to limit to top 2 flights for save tokens; You can adjust this as needed
         if not flights:
             return "No flights found."
         
         print("--- Successfully fetched flight data")  # Debugging statement
-
 
         # Return a content array - Claude sees this as the tool result
         #   supported type: text, image, resource
@@ -85,14 +85,6 @@ async def search_flights(args: dict[str, Any]) -> dict[str, Any]:
         print("--- Error fetching flight data:", response.status_code, response.text)  # Debugging statement
         return f"Error fetching flight data: {response.status_code}"
 
-
-# Wrap tool in an in-process MCP Server
-#  to register it to Claude
-flight_search_server = create_sdk_mcp_server(
-    name="flight",
-    version="1.0",
-    tools=[search_flights],
-)
 
 # ========================================================================================================
 # ============= Custom Tool preparation
@@ -149,7 +141,7 @@ async def search_hotels(args: dict[str, Any]) -> dict[str, Any]:
     if response.status_code == 200:
         results = response.json()
         hotels = results.get("properties", [])
-        hotels = hotels[:5] # limit to top 5 hotels for save tokens; You can adjust this as needed
+        hotels = hotels[:2] # limit to top 2 hotels for save tokens; You can adjust this as needed
         if not hotels:
             return "No hotels found."
         
@@ -167,10 +159,14 @@ async def search_hotels(args: dict[str, Any]) -> dict[str, Any]:
         print("--- Error fetching hotel data:", response.status_code, response.text)  # Debugging statement
         return f"Error fetching hotel data: {response.status_code}"
 
-hotel_search_server = create_sdk_mcp_server(
-    name="hotel",
+
+# ========================================================================================================
+# ============= Wrap tool in an in-process MCP Server
+# ========================================================================================================
+travel_search_server = create_sdk_mcp_server(
+    name="travel",
     version="1.0",
-    tools=[search_hotels],
+    tools=[search_flights, search_hotels],  # You can register multiple tools under the same server
 )
 
 
@@ -178,31 +174,53 @@ hotel_search_server = create_sdk_mcp_server(
 # ============= Code usage
 # ========================================================================================================
 
-SYSTEM_PROMPT = "You're a helpful travel assistant. A user will ask you to find flights and hotels for their trip."
+SYSTEM_PROMPT = """You're a helpful travel assistant. Help user for their trip.
+- Search flights using the `search_flights` tool
+- Search hotels using the `search_hotels` tool
+- Combine the results to find the best options for the user based on their preferences and constraints.
+- If you encounter any issues with the tools, explain the problem in detail."""
+
+# Simple sample
+# USER_PROMPT = SYSTEM_PROMPT + """
+#                 I have a developer conference in Singapore on April 30, 2026. I'm at Malaysia at the moment. I can spend 5 days there.
+#                 Can you help me with that?"""
+
+# More complex sample
 USER_PROMPT = SYSTEM_PROMPT + """
-                I have a developer conference in Singapore on April 15, 2026. I'm at Malaysia at the moment. I can spend 5 days there.
-                Can you help me with that? 
-                If the tool is failed, write in detail what's the issue"""
+                Need to fly to Singapore on May 1st, 2026. Spend a day there, 
+                then go to Jakarta for 2 days, before back to Malaysia.
+                Total budget is around $1000."""
+
 
 async def main():
     # Agentic loop: streams messages as Claude works
     async for message in query(
         prompt=USER_PROMPT,
         options=ClaudeAgentOptions(
-            mcp_servers={"flight": flight_search_server, "hotel": hotel_search_server},  # Register the MCP servers with the custom tools
-            allowed_tools=["mcp__flight__search_flights", "mcp__hotel__search_hotels"]  # Base: mcp__{server_name}__{tool_name}
+            include_partial_messages=True,
+            mcp_servers={"travel": travel_search_server},  # Register the MCP servers with the custom tools
+            allowed_tools=["mcp__travel__search_flights", "mcp__travel__search_hotels"],  # Base: mcp__{server_name}__{tool_name}
+            disallowed_tools=["Read"]
         ),
     ):
         # Print human-readable output
         if isinstance(message, AssistantMessage):
             for block in message.content:
                 if hasattr(block, "text"):
-                    print("Claude Reasoning:", end=" ")
+                    print("\nClaude Reasoning:", end=" ")
                     print(block.text)  # Claude's reasoning
                 elif hasattr(block, "name"):
-                    print(f"Tool: {block.name}")  # Tool being called
+                    print(f"\nTool: {block.name}")  # Tool being called
         elif isinstance(message, ResultMessage):
-            print(f"Done: {message.subtype}")  # Final result
+            print(f"\nDone: {message.subtype}")  # Final result
+
+        # Optional: to stream event
+        # if isinstance(message, StreamEvent):
+        #     event = message.event
+        #     if event.get("type") == "content_block_delta":
+        #         delta = event.get("delta", {})
+        #         if delta.get("type") == "text_delta":
+        #             print(delta.get("text", ""), end="", flush=True)
 
 
 asyncio.run(main())
