@@ -5,8 +5,21 @@ A sample usage of Claude Agent SDK with SerpApi.
 - [SerpApi](https://serpapi.com/use-cases/ai-search-engine-api): A simple API to access search engine results that you can use either for any application or specifically for AI/LLM.
 
 ## Run locally
-python3 -m venv path/to/venv         #one time only
+
+Create env setup (one time only):
+```
+python3 -m venv path/to/venv
+```
+
+Activate the env
+```
 source path/to/venv/bin/activate
+```
+
+Run the code
+```
+python $filename.py
+```
 
 
 ## Test Progress
@@ -15,7 +28,7 @@ source path/to/venv/bin/activate
 - [DONE] Custom tool (SerpApi - one tool) - `agent-serpapi-flight.py`
 - [DONE] Custom tool (SerpApi - multiple tools) - `agent-serpapi-travel.py`
 - [DONE] Connect MCP  - Server SerpApi  - `agent-serpapi-mcp.py`
-- [] Skills SerpApi
+- [] Connect - Skills SerpApi
 
 ## Resources
 
