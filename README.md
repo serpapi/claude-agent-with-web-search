@@ -1,5 +1,5 @@
 # About
-A sample usage of Claude Agent SDK with SerpApi.
+A sample usage of Claude Agent SDK with SerpApi. See how to connect your AI agent to live web search results.
 
 - [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview): An SDK provided by Anthropic team to create agent programmatically
 - [SerpApi](https://serpapi.com/use-cases/ai-search-engine-api): A simple API to access search engine results that you can use either for any application or specifically for AI/LLM.
@@ -21,14 +21,13 @@ Run the code
 python $filename.py
 ```
 
-
-## Test Progress
-- [DONE] Agent File (for testing only) - `agent-basic-file.py`
-- [DONE] Native web search - `agent-native-websearch.py` # Not optimal result
-- [DONE] Custom tool (SerpApi - one tool) - `agent-serpapi-flight.py`
-- [DONE] Custom tool (SerpApi - multiple tools) - `agent-serpapi-travel.py`
-- [DONE] Connect MCP  - Server SerpApi  - `agent-serpapi-mcp.py`
-- [] Connect - Skills SerpApi
+## File Information
+- Agent File (for testing only) - `agent-basic-file.py`
+- Native web search - `agent-native-websearch.py` # Not optimal result
+- Custom tool (SerpApi - one tool) - `agent-serpapi-flight.py`
+- Custom tool (SerpApi - multiple tools) - `agent-serpapi-travel.py`
+- Connect MCP  - Server SerpApi  - `agent-serpapi-mcp.py`
+- Connect Claude skills - SerpApi - `agent-serpapi-skill.py`
 
 ## Resources
 
