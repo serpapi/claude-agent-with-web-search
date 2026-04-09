@@ -31,5 +31,5 @@ python $filename.py
 
 ## Resources
 
-- Blog post link (coming soon..)
+- Blog post: [Claude Agent SDK tutorial](serpapi.com/blog/build-an-ai-agent-with-claude-agent-sdk/)
 - Video tutorial (coming soon..)
