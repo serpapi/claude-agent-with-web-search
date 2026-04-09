@@ -1,6 +1,7 @@
 # Custom tools || Ref: https://platform.claude.com/docs/en/agent-sdk/custom-tools
 # Manual method
 
+import time
 import json
 import requests
 import asyncio
@@ -66,9 +67,6 @@ async def search_flights(args: dict[str, Any]) -> dict[str, Any]:
         
         print("--- Successfully fetched flight data")  # Debugging statement
 
-
-        # Return a content array - Claude sees this as the tool result
-        #   supported type: text, image, resource
         return {
             "content": [
                 {
@@ -93,6 +91,7 @@ flight_search_server = create_sdk_mcp_server(
 USER_PROMPT = "I want to find a flight from Jakarta to Singapore departing on 2026-04-20 and returning on 2026-04-27. Can you help me with that? If the tool is failed, write in detail what's the issue"
 
 async def main():
+    start_time = time.perf_counter()
     # Agentic loop: streams messages as Claude works
     async for message in query(
         prompt=USER_PROMPT,
@@ -111,6 +110,11 @@ async def main():
                     print(f"Tool: {block.name}")  # Tool being called
         elif isinstance(message, ResultMessage):
             print(f"Done: {message.subtype}")  # Final result
+
+    
+    # Log time
+    elapsed = time.perf_counter() - start_time
+    print(f"Elapsed time: {elapsed:.2f} seconds")
 
 
 asyncio.run(main())

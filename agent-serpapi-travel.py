@@ -1,6 +1,7 @@
 # Custom tools || Ref: https://platform.claude.com/docs/en/agent-sdk/custom-tools
 # Manual method
 
+import time
 import json
 import requests
 import asyncio
@@ -181,22 +182,22 @@ SYSTEM_PROMPT = """You're a helpful travel assistant. Help user for their trip.
 - If you encounter any issues with the tools, explain the problem in detail."""
 
 # Simple sample
-# USER_PROMPT = SYSTEM_PROMPT + """
-#                 I have a developer conference in Singapore on April 30, 2026. I'm at Malaysia at the moment. I can spend 5 days there.
-#                 Can you help me with that?"""
+USER_PROMPT = """ I have a developer conference in Singapore on April 30, 2026. I'm at Malaysia at the moment. I can spend 5 days there.
+                Can you help me with that?"""
 
 # More complex sample
-USER_PROMPT = SYSTEM_PROMPT + """
-                Need to fly to Singapore on May 1st, 2026. Spend a day there, 
-                then go to Jakarta for 2 days, before back to Malaysia.
-                Total budget is around $1000."""
+# USER_PROMPT = """ Need to fly to Singapore on May 1st, 2026. Spend a day there, 
+#                 then go to Jakarta for 2 days, before back to Malaysia.
+#                 Total budget is around $1000."""
 
 
 async def main():
-    # Agentic loop: streams messages as Claude works
+    start_time = time.perf_counter()
+
     async for message in query(
         prompt=USER_PROMPT,
         options=ClaudeAgentOptions(
+            system_prompt=SYSTEM_PROMPT,
             include_partial_messages=True,
             mcp_servers={"travel": travel_search_server},  # Register the MCP servers with the custom tools
             allowed_tools=["mcp__travel__search_flights", "mcp__travel__search_hotels"],  # Base: mcp__{server_name}__{tool_name}
@@ -222,5 +223,8 @@ async def main():
         #         if delta.get("type") == "text_delta":
         #             print(delta.get("text", ""), end="", flush=True)
 
+    # Log time
+    elapsed = time.perf_counter() - start_time
+    print(f"Elapsed time: {elapsed:.2f} seconds")
 
 asyncio.run(main())
