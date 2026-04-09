@@ -20,7 +20,7 @@ async def main():
     # USER_PROMPT = "Use the MCP server to explain what it does and how to use it."
     # USER_PROMPT = "Use the MCP server; What's trending news for AI? share links if possible."
 
-    SYSTEM_PROMPT = "Always use the SerpApi MCP server for web search;" # Pro tips add system prompt
+    SYSTEM_PROMPT = "Always use the SerpApi MCP server for web search;" 
     USER_PROMPT = "Find me a hotel under $100 in Bay Area next week."
 
     options = ClaudeAgentOptions(

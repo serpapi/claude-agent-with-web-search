@@ -26,6 +26,7 @@ python $filename.py
 - Native web search - `agent-native-websearch.py` # Not optimal result
 - Custom tool (SerpApi - one tool) - `agent-serpapi-flight.py`
 - Custom tool (SerpApi - multiple tools) - `agent-serpapi-travel.py`
+- Multi turn conversation with agent travel - `agent-serpapi-travel-with-session.py`
 - Connect MCP  - Server SerpApi  - `agent-serpapi-mcp.py`
 - Connect Claude skills - SerpApi - `agent-serpapi-skill.py`
 
